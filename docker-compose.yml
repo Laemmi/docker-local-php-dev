@@ -1,20 +1,21 @@
-version: '3.2'
+version: '3'
 
 services:
-  db:
-    image: mariadb/server:10.3
+  mysql:
+    image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: root
     ports:
       - "3307:3306"
     volumes:
-      - ./data/dump.sql:/docker-entrypoint-initdb.d/dump.sql
-  web:
-    build: './.docker/php/'
-    container_name: php_web
+      - ./.docker/mysql/data:/var/lib/mysql:cached
+  php:
+    image: laemmi/php-ci
     depends_on:
-      - db
+      - mysql
     ports:
-      - "9080:80"
+      - "8080:80"
     volumes:
-      - ./public/:/var/www/html/
+      - ./.docker/apache2/log:/var/log/apache2:cached
+      - ./.docker/apache2/sites-enabled:/etc/apache2/sites-enabled:cached
+      - ./:/var/www/html:cached
